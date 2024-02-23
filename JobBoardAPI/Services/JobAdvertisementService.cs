@@ -17,11 +17,13 @@ namespace JobBoardAPI.Services
     {
         private readonly JobBoardDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly ILogger<JobAdvertisementService> _logger;
 
-        public JobAdvertisementService(JobBoardDbContext dbContext, IMapper mapper)
+        public JobAdvertisementService(JobBoardDbContext dbContext, IMapper mapper, ILogger<JobAdvertisementService> logger)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public IEnumerable<JobAdvertisementDto> GetAll()
@@ -66,6 +68,8 @@ namespace JobBoardAPI.Services
 
         public bool Delete(int id)
         {
+            _logger.LogWarning($"Job advertisement with id: {id} DELETE action invoked");
+
             var jobAdvertisement = _dbContext
                 .JobAdvertisements
                 .FirstOrDefault(a => a.Id == id);
