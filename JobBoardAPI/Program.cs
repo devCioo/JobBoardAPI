@@ -1,5 +1,6 @@
 using JobBoardAPI.Entities;
 using JobBoardAPI.Services;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -8,6 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<JobBoardDbContext>();
 builder.Services.AddScoped<DataSeeder>();
+builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+builder.Services.AddScoped<IJobAdvertisementService, JobAdvertisementService>();
 
 var app = builder.Build();
 
