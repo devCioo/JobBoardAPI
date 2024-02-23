@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using JobBoardAPI.Entities;
+using JobBoardAPI.Models;
 
-namespace JobBoardAPI.Models
+namespace JobBoardAPI.Miscellaneous
 {
     public class JobBoardMappingProfile : Profile
     {

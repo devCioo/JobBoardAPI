@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using JobBoardAPI.Entities;
 using JobBoardAPI.Exceptions;
+using JobBoardAPI.Miscellaneous;
 using JobBoardAPI.Models;
 using Microsoft.EntityFrameworkCore;
 

@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace JobBoardAPI.Controllers
 {
     [Route("api/jobadvertisement/{jobAdvertisementId}/jobapplication")]
+    [ApiController]
     public class JobApplicationController : ControllerBase
     {
         private readonly IJobApplicationService _jobApplicationService;

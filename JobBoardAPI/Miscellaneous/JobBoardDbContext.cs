@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using JobBoardAPI.Entities;
+using Microsoft.EntityFrameworkCore;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace JobBoardAPI.Entities
+namespace JobBoardAPI.Miscellaneous
 {
     public class JobBoardDbContext : DbContext
     {
