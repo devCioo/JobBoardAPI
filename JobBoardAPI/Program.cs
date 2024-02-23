@@ -20,6 +20,7 @@ builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IJobAdvertisementService, JobAdvertisementService>();
 builder.Services.AddScoped<ErrorHandlingMiddleware>();
+builder.Services.AddScoped<RequestTimeMiddleware>();
 
 var app = builder.Build();
 
@@ -30,6 +31,7 @@ var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
 seeder.Seed();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
+app.UseMiddleware<RequestTimeMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
