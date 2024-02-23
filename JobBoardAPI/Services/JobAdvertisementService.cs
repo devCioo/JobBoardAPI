@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using JobBoardAPI.Entities;
+using JobBoardAPI.Exceptions;
 using JobBoardAPI.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,8 +11,8 @@ namespace JobBoardAPI.Services
         IEnumerable<JobAdvertisementDto> GetAll();
         JobAdvertisementDto GetById(int id);
         int Create(CreateJobAdvertisementDto dto);
-        bool Delete(int id);
-        bool Update(int id, UpdateJobAdvertisementDto dto);
+        void Delete(int id);
+        void Update(int id, UpdateJobAdvertisementDto dto);
     }
     public class JobAdvertisementService : IJobAdvertisementService
     {
@@ -48,7 +49,7 @@ namespace JobBoardAPI.Services
 
             if (jobAdvertisement is null)
             {
-                return null;
+                throw new NotFoundException("Job advertisement not found");
             }
 
             var jobAdvertisementDto = _mapper.Map<JobAdvertisementDto>(jobAdvertisement);
@@ -66,9 +67,9 @@ namespace JobBoardAPI.Services
             return jobAdvertisement.Id;
         }
 
-        public bool Delete(int id)
+        public void Delete(int id)
         {
-            _logger.LogWarning($"Job advertisement with id: {id} DELETE action invoked");
+            _logger.LogError($"Job advertisement with id: {id} DELETE action invoked");
 
             var jobAdvertisement = _dbContext
                 .JobAdvertisements
@@ -76,15 +77,14 @@ namespace JobBoardAPI.Services
 
             if (jobAdvertisement is null)
             {
-                return false;
+                throw new NotFoundException("Job advertisement not found");
             }
 
             _dbContext.JobAdvertisements.Remove(jobAdvertisement);
             _dbContext.SaveChanges();
-            return true;
         }
 
-        public bool Update(int id, UpdateJobAdvertisementDto dto)
+        public void Update(int id, UpdateJobAdvertisementDto dto)
         {
             var advertisement = _dbContext
                 .JobAdvertisements
@@ -94,7 +94,7 @@ namespace JobBoardAPI.Services
 
             if (advertisement is null)
             {
-                return false;
+                throw new NotFoundException("Job advertisement not found");
             }
 
             advertisement.Name = dto.Name;
@@ -107,7 +107,6 @@ namespace JobBoardAPI.Services
             advertisement.Requirements = dto.Requirements;
 
             _dbContext.SaveChanges();
-            return true;
         }
     }
 }

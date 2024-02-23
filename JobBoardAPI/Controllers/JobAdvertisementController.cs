@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace JobBoardAPI.Controllers
 {
     [Route("api/advertisement")]
+    [ApiController]
     public class JobAdvertisementController : ControllerBase
     {
         private readonly IJobAdvertisementService _jobAdvertisementService;
@@ -28,22 +29,12 @@ namespace JobBoardAPI.Controllers
         {
             var jobAdvertisement = _jobAdvertisementService.GetById(id);
 
-            if (jobAdvertisement is null)
-            {
-                return NotFound();
-            }
-
             return Ok(jobAdvertisement);
         }
 
         [HttpPost]
         public ActionResult Post([FromBody] CreateJobAdvertisementDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var id = _jobAdvertisementService.Create(dto);
 
             return Created($"/api/advertisement/{id}", null);
@@ -52,12 +43,7 @@ namespace JobBoardAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-            var isDeleted = _jobAdvertisementService.Delete(id);
-
-            if (!isDeleted)
-            {
-                return NotFound();
-            }
+            _jobAdvertisementService.Delete(id);
 
             return NoContent();
         }
@@ -65,16 +51,7 @@ namespace JobBoardAPI.Controllers
         [HttpPut("{id}")]
         public ActionResult Update([FromRoute] int id, [FromBody] UpdateJobAdvertisementDto dto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var isUpdated = _jobAdvertisementService.Update(id, dto);
-            if (!isUpdated)
-            {
-                return NotFound();
-            }
+            _jobAdvertisementService.Update(id, dto);
 
             return Ok();
         }

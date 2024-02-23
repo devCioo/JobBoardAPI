@@ -1,4 +1,5 @@
 using JobBoardAPI.Entities;
+using JobBoardAPI.Middleware;
 using JobBoardAPI.Services;
 using NLog.Web;
 using System.Reflection;
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<JobBoardDbContext>();
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IJobAdvertisementService, JobAdvertisementService>();
+builder.Services.AddScoped<ErrorHandlingMiddleware>();
 
 var app = builder.Build();
 
@@ -27,6 +29,7 @@ var scope = app.Services.CreateScope();
 var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
 seeder.Seed();
 
+app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
