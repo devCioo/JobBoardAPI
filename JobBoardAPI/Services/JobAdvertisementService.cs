@@ -101,7 +101,7 @@ namespace JobBoardAPI.Services
             advertisement.CompanyName = dto.CompanyName;
             advertisement.CategoryId = dto.CategoryId;
             advertisement.Address.City = dto.City;
-            advertisement.Address.Street = dto.City;
+            advertisement.Address.Street = dto.Street;
             advertisement.Address.PostalCode = dto.PostalCode;
             advertisement.Responsibilities = dto.Responsibilities;
             advertisement.Requirements = dto.Requirements;

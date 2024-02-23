@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace JobBoardAPI.Controllers
 {
-    [Route("api/advertisement")]
+    [Route("api/jobadvertisement")]
     [ApiController]
     public class JobAdvertisementController : ControllerBase
     {
@@ -17,7 +17,7 @@ namespace JobBoardAPI.Controllers
         }
 
         [HttpGet]
-        public ActionResult<IEnumerable<JobAdvertisement>> GetAll()
+        public ActionResult<IEnumerable<JobAdvertisementDto>> GetAll()
         {
             var jobAdvertisementsDtos = _jobAdvertisementService.GetAll();
 
@@ -25,19 +25,19 @@ namespace JobBoardAPI.Controllers
         }
 
         [HttpGet("{id}")]
-        public ActionResult<JobAdvertisement> Get([FromRoute] int id)
+        public ActionResult<JobAdvertisementDto> Get([FromRoute] int id)
         {
-            var jobAdvertisement = _jobAdvertisementService.GetById(id);
+            var jobAdvertisementDto = _jobAdvertisementService.GetById(id);
 
-            return Ok(jobAdvertisement);
+            return Ok(jobAdvertisementDto);
         }
 
         [HttpPost]
-        public ActionResult Post([FromBody] CreateJobAdvertisementDto dto)
+        public ActionResult Create([FromBody] CreateJobAdvertisementDto dto)
         {
             var id = _jobAdvertisementService.Create(dto);
 
-            return Created($"/api/advertisement/{id}", null);
+            return Created($"/api/jobadvertisement/{id}", null);
         }
 
         [HttpDelete("{id}")]
