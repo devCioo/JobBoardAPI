@@ -10,6 +10,9 @@ namespace JobBoardAPI.Entities
         public DbSet<JobApplication> JobApplications { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Address> Addresses { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -46,6 +49,16 @@ namespace JobBoardAPI.Entities
                 .Property(a => a.Street)
                 .IsRequired()
                 .HasMaxLength(60);
+
+            // User
+            modelBuilder.Entity<User>()
+                .Property(u => u.Email)
+                .IsRequired();
+
+            // Role
+            modelBuilder.Entity<Role>()
+                .Property(r => r.Name)
+                .IsRequired();
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

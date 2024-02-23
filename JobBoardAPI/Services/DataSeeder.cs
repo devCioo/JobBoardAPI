@@ -20,6 +20,12 @@ namespace JobBoardAPI.Services
                     _dbContext.AddRange(categories);
                     _dbContext.SaveChanges();
                 }
+                if (!_dbContext.Roles.Any())
+                {
+                    var roles = GetRoles();
+                    _dbContext.AddRange(roles);
+                    _dbContext.SaveChanges();
+                }
             }
         }
 
@@ -38,6 +44,23 @@ namespace JobBoardAPI.Services
             }
 
             return categories;
+        }
+
+        private IEnumerable<Role> GetRoles()
+        {
+            string[] names =
+                ["Employee", "Employer", "Moderator", "Administrator"];
+            var roles = new List<Role>();
+
+            foreach (var name in names)
+            {
+                roles.Add(new Role()
+                {
+                    Name = name
+                });
+            }
+
+            return roles;
         }
     }
 }
