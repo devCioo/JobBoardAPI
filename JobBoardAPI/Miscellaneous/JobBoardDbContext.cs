@@ -29,6 +29,11 @@ namespace JobBoardAPI.Miscellaneous
             modelBuilder.Entity<JobAdvertisement>()
                 .Property(ja => ja.Responsibilities)
                 .IsRequired();
+            modelBuilder.Entity<JobAdvertisement>()
+                .HasMany(j => j.JobApplications)
+                .WithOne(a => a.JobAdvertisement)
+                .HasForeignKey(a => a.JobAdvertisementId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // JobApplication
             modelBuilder.Entity<JobApplication>()

@@ -1,12 +1,15 @@
 ﻿using JobBoardAPI.Entities;
 using JobBoardAPI.Models;
 using JobBoardAPI.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace JobBoardAPI.Controllers
 {
     [Route("api/jobadvertisement")]
     [ApiController]
+    [Authorize(Roles = "Administrator,Employer")]
     public class JobAdvertisementController : ControllerBase
     {
         private readonly IJobAdvertisementService _jobAdvertisementService;
@@ -17,6 +20,7 @@ namespace JobBoardAPI.Controllers
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public ActionResult<IEnumerable<JobAdvertisementDto>> GetAll()
         {
             var jobAdvertisementsDtos = _jobAdvertisementService.GetAll();
@@ -25,6 +29,7 @@ namespace JobBoardAPI.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public ActionResult<JobAdvertisementDto> Get([FromRoute] int id)
         {
             var jobAdvertisementDto = _jobAdvertisementService.GetById(id);
@@ -35,7 +40,8 @@ namespace JobBoardAPI.Controllers
         [HttpPost]
         public ActionResult Create([FromBody] CreateJobAdvertisementDto dto)
         {
-            var id = _jobAdvertisementService.Create(dto);
+            var userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
+            var id = _jobAdvertisementService.Create(userId, dto);
 
             return Created($"/api/jobadvertisement/{id}", null);
         }
@@ -43,7 +49,7 @@ namespace JobBoardAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-            _jobAdvertisementService.Delete(id);
+            _jobAdvertisementService.Delete(id, User);
 
             return NoContent();
         }
@@ -51,7 +57,7 @@ namespace JobBoardAPI.Controllers
         [HttpPut("{id}")]
         public ActionResult Update([FromRoute] int id, [FromBody] UpdateJobAdvertisementDto dto)
         {
-            _jobAdvertisementService.Update(id, dto);
+            _jobAdvertisementService.Update(id, dto, User);
 
             return Ok();
         }

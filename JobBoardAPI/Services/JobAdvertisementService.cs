@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
+using JobBoardAPI.Authorization;
 using JobBoardAPI.Entities;
 using JobBoardAPI.Exceptions;
 using JobBoardAPI.Miscellaneous;
 using JobBoardAPI.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace JobBoardAPI.Services
 {
@@ -11,21 +14,23 @@ namespace JobBoardAPI.Services
     {
         IEnumerable<JobAdvertisementDto> GetAll();
         JobAdvertisementDto GetById(int id);
-        int Create(CreateJobAdvertisementDto dto);
-        void Delete(int id);
-        void Update(int id, UpdateJobAdvertisementDto dto);
+        int Create(int userId,CreateJobAdvertisementDto dto);
+        void Delete(int id, ClaimsPrincipal user);
+        void Update(int id, UpdateJobAdvertisementDto dto, ClaimsPrincipal user);
     }
     public class JobAdvertisementService : IJobAdvertisementService
     {
         private readonly JobBoardDbContext _dbContext;
         private readonly IMapper _mapper;
         private readonly ILogger<JobAdvertisementService> _logger;
+        private readonly IAuthorizationService _authorizationService;
 
-        public JobAdvertisementService(JobBoardDbContext dbContext, IMapper mapper, ILogger<JobAdvertisementService> logger)
+        public JobAdvertisementService(JobBoardDbContext dbContext, IMapper mapper, ILogger<JobAdvertisementService> logger, IAuthorizationService authorizationService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
+            _authorizationService = authorizationService;
         }
 
         public IEnumerable<JobAdvertisementDto> GetAll()
@@ -57,10 +62,11 @@ namespace JobBoardAPI.Services
             return jobAdvertisementDto;
         }
 
-        public int Create(CreateJobAdvertisementDto dto)
+        public int Create(int userId, CreateJobAdvertisementDto dto)
         {
             var jobAdvertisement = _mapper.Map<JobAdvertisement>(dto);
             jobAdvertisement.PostedOn = DateTime.Now;
+            jobAdvertisement.UserId = userId;
 
             _dbContext.JobAdvertisements.Add(jobAdvertisement);
             _dbContext.SaveChanges();
@@ -68,7 +74,7 @@ namespace JobBoardAPI.Services
             return jobAdvertisement.Id;
         }
 
-        public void Delete(int id)
+        public void Delete(int id, ClaimsPrincipal user)
         {
             _logger.LogError($"Job advertisement with id: {id} DELETE action invoked");
 
@@ -81,31 +87,47 @@ namespace JobBoardAPI.Services
                 throw new NotFoundException("Job advertisement not found");
             }
 
+            var authorizationResult = _authorizationService.AuthorizeAsync(user, jobAdvertisement,
+                new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
+
             _dbContext.JobAdvertisements.Remove(jobAdvertisement);
             _dbContext.SaveChanges();
         }
 
-        public void Update(int id, UpdateJobAdvertisementDto dto)
+        public void Update(int id, UpdateJobAdvertisementDto dto, ClaimsPrincipal user)
         {
-            var advertisement = _dbContext
+            var jobAdvertisement = _dbContext
                 .JobAdvertisements
                 .Include(a => a.Category)
                 .Include(a => a.Address)
                 .FirstOrDefault(a => a.Id == id);
 
-            if (advertisement is null)
+            if (jobAdvertisement is null)
             {
                 throw new NotFoundException("Job advertisement not found");
             }
 
-            advertisement.Name = dto.Name;
-            advertisement.CompanyName = dto.CompanyName;
-            advertisement.CategoryId = dto.CategoryId;
-            advertisement.Address.City = dto.City;
-            advertisement.Address.Street = dto.Street;
-            advertisement.Address.PostalCode = dto.PostalCode;
-            advertisement.Responsibilities = dto.Responsibilities;
-            advertisement.Requirements = dto.Requirements;
+            var authorizationResult = _authorizationService.AuthorizeAsync(user, jobAdvertisement, 
+                new ResourceOperationRequirement(ResourceOperation.Update)).Result;
+
+            if (!authorizationResult.Succeeded)
+            {
+                throw new ForbidException();
+            }
+
+            jobAdvertisement.Name = dto.Name;
+            jobAdvertisement.CompanyName = dto.CompanyName;
+            jobAdvertisement.CategoryId = dto.CategoryId;
+            jobAdvertisement.Address.City = dto.City;
+            jobAdvertisement.Address.Street = dto.Street;
+            jobAdvertisement.Address.PostalCode = dto.PostalCode;
+            jobAdvertisement.Responsibilities = dto.Responsibilities;
+            jobAdvertisement.Requirements = dto.Requirements;
 
             _dbContext.SaveChanges();
         }

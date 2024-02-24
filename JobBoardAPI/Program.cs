@@ -1,11 +1,13 @@
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using JobBoardAPI.Authorization;
 using JobBoardAPI.Entities;
 using JobBoardAPI.Middleware;
 using JobBoardAPI.Miscellaneous;
 using JobBoardAPI.Models;
 using JobBoardAPI.Services;
 using JobBoardAPI.Validators;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using NLog.Web;
@@ -54,6 +56,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IValidator<RegisterUserDto>, RegisterUserDtoValidator>();
 builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddScoped<IAuthorizationHandler, ResourceOperationRequirementHandler>();
 
 var app = builder.Build();
 

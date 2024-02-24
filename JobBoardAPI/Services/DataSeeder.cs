@@ -50,7 +50,7 @@ namespace JobBoardAPI.Services
         private IEnumerable<Role> GetRoles()
         {
             string[] names =
-                ["Employee", "Employer", "Moderator", "Administrator"];
+                ["Employee", "Employer", "Administrator"];
             var roles = new List<Role>();
 
             foreach (var name in names)

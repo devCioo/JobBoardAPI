@@ -7,5 +7,7 @@
         public DateTime AppliedOn { get; set; }
         public int JobAdvertisementId { get; set; }
         public virtual JobAdvertisement JobAdvertisement { get; set; }
+        public int UserId { get; set; }
+        public virtual User User { get; set; }
     }
 }
