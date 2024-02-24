@@ -14,9 +14,9 @@ namespace JobBoardAPI.Services
     {
         IEnumerable<JobAdvertisementDto> GetAll();
         JobAdvertisementDto GetById(int id);
-        int Create(int userId,CreateJobAdvertisementDto dto);
-        void Delete(int id, ClaimsPrincipal user);
-        void Update(int id, UpdateJobAdvertisementDto dto, ClaimsPrincipal user);
+        int Create(CreateJobAdvertisementDto dto);
+        void Delete(int id);
+        void Update(int id, UpdateJobAdvertisementDto dto);
     }
     public class JobAdvertisementService : IJobAdvertisementService
     {
@@ -24,13 +24,16 @@ namespace JobBoardAPI.Services
         private readonly IMapper _mapper;
         private readonly ILogger<JobAdvertisementService> _logger;
         private readonly IAuthorizationService _authorizationService;
+        private readonly IUserContextService _userContextService;
 
-        public JobAdvertisementService(JobBoardDbContext dbContext, IMapper mapper, ILogger<JobAdvertisementService> logger, IAuthorizationService authorizationService)
+        public JobAdvertisementService(JobBoardDbContext dbContext, IMapper mapper, ILogger<JobAdvertisementService> logger, 
+            IAuthorizationService authorizationService, IUserContextService userContextService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _logger = logger;
             _authorizationService = authorizationService;
+            _userContextService = userContextService;
         }
 
         public IEnumerable<JobAdvertisementDto> GetAll()
@@ -62,11 +65,11 @@ namespace JobBoardAPI.Services
             return jobAdvertisementDto;
         }
 
-        public int Create(int userId, CreateJobAdvertisementDto dto)
+        public int Create(CreateJobAdvertisementDto dto)
         {
             var jobAdvertisement = _mapper.Map<JobAdvertisement>(dto);
             jobAdvertisement.PostedOn = DateTime.Now;
-            jobAdvertisement.UserId = userId;
+            jobAdvertisement.UserId = _userContextService.GetUserId;
 
             _dbContext.JobAdvertisements.Add(jobAdvertisement);
             _dbContext.SaveChanges();
@@ -74,7 +77,7 @@ namespace JobBoardAPI.Services
             return jobAdvertisement.Id;
         }
 
-        public void Delete(int id, ClaimsPrincipal user)
+        public void Delete(int id)
         {
             _logger.LogError($"Job advertisement with id: {id} DELETE action invoked");
 
@@ -87,7 +90,7 @@ namespace JobBoardAPI.Services
                 throw new NotFoundException("Job advertisement not found");
             }
 
-            var authorizationResult = _authorizationService.AuthorizeAsync(user, jobAdvertisement,
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, jobAdvertisement,
                 new ResourceOperationRequirement(ResourceOperation.Delete)).Result;
 
             if (!authorizationResult.Succeeded)
@@ -99,7 +102,7 @@ namespace JobBoardAPI.Services
             _dbContext.SaveChanges();
         }
 
-        public void Update(int id, UpdateJobAdvertisementDto dto, ClaimsPrincipal user)
+        public void Update(int id, UpdateJobAdvertisementDto dto)
         {
             var jobAdvertisement = _dbContext
                 .JobAdvertisements
@@ -112,7 +115,7 @@ namespace JobBoardAPI.Services
                 throw new NotFoundException("Job advertisement not found");
             }
 
-            var authorizationResult = _authorizationService.AuthorizeAsync(user, jobAdvertisement, 
+            var authorizationResult = _authorizationService.AuthorizeAsync(_userContextService.User, jobAdvertisement, 
                 new ResourceOperationRequirement(ResourceOperation.Update)).Result;
 
             if (!authorizationResult.Succeeded)

@@ -40,8 +40,7 @@ namespace JobBoardAPI.Controllers
         [HttpPost]
         public ActionResult Create([FromBody] CreateJobAdvertisementDto dto)
         {
-            var userId = int.Parse(User.FindFirst(c => c.Type == ClaimTypes.NameIdentifier).Value);
-            var id = _jobAdvertisementService.Create(userId, dto);
+            var id = _jobAdvertisementService.Create(dto);
 
             return Created($"/api/jobadvertisement/{id}", null);
         }
@@ -49,7 +48,7 @@ namespace JobBoardAPI.Controllers
         [HttpDelete("{id}")]
         public ActionResult Delete([FromRoute] int id)
         {
-            _jobAdvertisementService.Delete(id, User);
+            _jobAdvertisementService.Delete(id);
 
             return NoContent();
         }
@@ -57,7 +56,7 @@ namespace JobBoardAPI.Controllers
         [HttpPut("{id}")]
         public ActionResult Update([FromRoute] int id, [FromBody] UpdateJobAdvertisementDto dto)
         {
-            _jobAdvertisementService.Update(id, dto, User);
+            _jobAdvertisementService.Update(id, dto);
 
             return Ok();
         }
