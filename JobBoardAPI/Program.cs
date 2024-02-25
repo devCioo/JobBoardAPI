@@ -65,6 +65,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+app.UseResponseCaching();
+app.UseStaticFiles();
 var scope = app.Services.CreateScope();
 var seeder = scope.ServiceProvider.GetRequiredService<DataSeeder>();
 seeder.Seed();
