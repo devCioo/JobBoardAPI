@@ -21,9 +21,9 @@ namespace JobBoardAPI.Controllers
 
         [HttpGet]
         [AllowAnonymous]
-        public ActionResult<IEnumerable<JobAdvertisementDto>> GetAll()
+        public ActionResult<IEnumerable<JobAdvertisementDto>> GetAll([FromQuery] JobAdvertisementQuery query)
         {
-            var jobAdvertisementsDtos = _jobAdvertisementService.GetAll();
+            var jobAdvertisementsDtos = _jobAdvertisementService.GetAll(query);
 
             return Ok(jobAdvertisementsDtos);
         }

@@ -6,13 +6,14 @@ using JobBoardAPI.Miscellaneous;
 using JobBoardAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Security.Claims;
 
 namespace JobBoardAPI.Services
 {
     public interface IJobAdvertisementService
     {
-        IEnumerable<JobAdvertisementDto> GetAll();
+        PagedResult<JobAdvertisementDto> GetAll(JobAdvertisementQuery query);
         JobAdvertisementDto GetById(int id);
         int Create(CreateJobAdvertisementDto dto);
         void Delete(int id);
@@ -36,16 +37,40 @@ namespace JobBoardAPI.Services
             _userContextService = userContextService;
         }
 
-        public IEnumerable<JobAdvertisementDto> GetAll()
+        public PagedResult<JobAdvertisementDto> GetAll(JobAdvertisementQuery query)
         {
-            var jobAdvertisements = _dbContext
+            var baseQuery = _dbContext
                 .JobAdvertisements
                 .Include(ja => ja.Category)
                 .Include(ja => ja.Address)
+                .Where(ja => query.SearchPhrase == null || (ja.Name.ToLower().Contains(query.SearchPhrase.ToLower())
+                                                        || ja.Description.ToLower().Contains(query.SearchPhrase.ToLower())));
+
+            if (!string.IsNullOrEmpty(query.SortBy))
+            {
+                var columnsSelectors = new Dictionary<string, Expression<Func<JobAdvertisement, object>>>
+                {
+                    {nameof(JobAdvertisement.Name), ja => ja.Name },
+                    {nameof(JobAdvertisement.Description), ja => ja.Name },
+                    {nameof(JobAdvertisement.PostedOn), ja => ja.PostedOn }
+                };
+
+                var selectedColumn = columnsSelectors[query.SortBy];
+
+                baseQuery = query.SortDirection == SortDirection.ASC 
+                    ? baseQuery.OrderBy(selectedColumn)
+                    : baseQuery.OrderByDescending(selectedColumn);
+            }
+
+            var jobAdvertisements = baseQuery
+                .Skip(query.PageSize * (query.PageNumber - 1))
+                .Take(query.PageSize)
                 .ToList();
 
             var jobAdvertisementsDtos = _mapper.Map<List<JobAdvertisementDto>>(jobAdvertisements);
-            return jobAdvertisementsDtos;
+            var result = new PagedResult<JobAdvertisementDto>(jobAdvertisementsDtos, baseQuery.Count(), query.PageSize, query.PageNumber);
+
+            return result;
         }
 
         public JobAdvertisementDto GetById(int id)
