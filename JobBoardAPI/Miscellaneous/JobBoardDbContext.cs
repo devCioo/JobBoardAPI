@@ -6,7 +6,10 @@ namespace JobBoardAPI.Miscellaneous
 {
     public class JobBoardDbContext : DbContext
     {
-        private string _connectionString = "Server=(localdb)\\mssqllocaldb;Database=JobBoardDb;Trusted_Connection=True;";
+        public JobBoardDbContext(DbContextOptions<JobBoardDbContext> options) : base(options)
+        {
+            
+        }
         public DbSet<JobAdvertisement> JobAdvertisements { get; set; }
         public DbSet<JobApplication> JobApplications { get; set; }
         public DbSet<Category> Categories { get; set; }
@@ -65,11 +68,6 @@ namespace JobBoardAPI.Miscellaneous
             modelBuilder.Entity<Role>()
                 .Property(r => r.Name)
                 .IsRequired();
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            optionsBuilder.UseSqlServer(_connectionString);
         }
     }
 }

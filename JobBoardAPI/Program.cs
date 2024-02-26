@@ -9,6 +9,7 @@ using JobBoardAPI.Services;
 using JobBoardAPI.Validators;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using NLog.Web;
 using System.Reflection;
@@ -44,7 +45,7 @@ builder.Services.AddAuthentication(option =>
 });
 
 builder.Services.AddControllers();
-builder.Services.AddDbContext<JobBoardDbContext>();
+builder.Services.AddDbContext<JobBoardDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("JobBoardDbConnection")));
 builder.Services.AddScoped<DataSeeder>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddScoped<IJobAdvertisementService, JobAdvertisementService>();

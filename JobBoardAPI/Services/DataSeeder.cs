@@ -1,5 +1,6 @@
 ﻿using JobBoardAPI.Entities;
 using JobBoardAPI.Miscellaneous;
+using Microsoft.EntityFrameworkCore;
 
 namespace JobBoardAPI.Services
 {
@@ -15,6 +16,12 @@ namespace JobBoardAPI.Services
         {
             if (_dbContext.Database.CanConnect())
             {
+                var pendingMigrations = _dbContext.Database.GetPendingMigrations();
+                if (pendingMigrations != null && pendingMigrations.Any())
+                {
+                    _dbContext.Database.Migrate();
+                }
+
                 if (!_dbContext.Categories.Any())
                 {
                     var categories = GetCategories();
